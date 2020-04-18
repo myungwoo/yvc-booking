@@ -1,0 +1,26 @@
+{
+  "name": "yvc-booking",
+  "version": "0.1.0",
+  "description": "",
+  "private": true,
+  "scripts": {
+    "start": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "nodemon server.js",
+    "client": "node start-client.js",
+    "lint": "eslint '**/*.js'"
+  },
+  "author": "Myungwoo Chun",
+  "dependencies": {
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "babel-eslint": "^10.1.0",
+    "concurrently": "^5.1.0",
+    "eslint": "^6.8.0",
+    "eslint-plugin-react": "^7.19.0",
+    "nodemon": "^2.0.3"
+  },
+  "eslintIgnore": [
+    "client/*"
+  ]
+}
