@@ -58,7 +58,7 @@ router.post('/rooms/:name/:position', async (req, res) => {
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
   if (now < room.startTime || now > room.endTime)
-    return res.sendStatus(400);
+    return res.status(403).send({ reason: 'time' });
   if (booker === undefined || simplePassword === undefined)
     return res.sendStatus(400);
   const [booking, created] = await db.Booking.findOrCreate({
@@ -67,7 +67,7 @@ router.post('/rooms/:name/:position', async (req, res) => {
   });
   // Booking이 이미 존재하면 403
   if (!created)
-    return res.sendStatus(403);
+    return res.status(403).send({ reason: 'exists' });
   res.status(201).send(booking.dataValues);
   const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
   req.wss.broadcastRoom(name, bookings);
@@ -85,7 +85,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
   if (now < room.startTime || now > room.endTime)
-    return res.sendStatus(400);
+    return res.status(403).send({ reason: 'time' });
   if (booker === undefined || simplePassword === undefined)
     return res.sendStatus(400);
   const booking = await db.Booking.findOne({
@@ -96,7 +96,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
     return res.sendStatus(404);
   // Booking이 가지고 있는 비밀번호와 다른 경우 403
   if (booking.dataValues.simplePassword !== simplePassword)
-    return res.sendStatus(403);
+    return res.status(403).send({ reason: 'password' });
   booking.booker = booker;
   if (newSimplePassword !== undefined)
     booking.simplePassword = newSimplePassword;
@@ -117,7 +117,7 @@ router.delete('/rooms/:name/:position', async (req, res) => {
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
   if (now < room.startTime || now > room.endTime)
-    return res.sendStatus(400);
+    return res.status(403).send({ reason: 'time' });
   const booking = await db.Booking.findOne({
     where: { room: name, position },
   });
@@ -128,7 +128,7 @@ router.delete('/rooms/:name/:position', async (req, res) => {
   // Booking이 가지고 있는 비밀번호와 다른 경우 403
   const { authorization } = req.headers;
   if (authorization === undefined || !authorization.startsWith('SimplePassword ') || authorization.split(' ')[1] !== booking.dataValues.simplePassword)
-    return res.sendStatus(403);
+    return res.status(403).send({ reason: 'password' });
   await booking.destroy();
   res.send(booking.dataValues);
   const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));

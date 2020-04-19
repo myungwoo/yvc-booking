@@ -12,5 +12,12 @@
         "layout": "mainhall",
         "startTime": "2020-04-10 23:59:12",
         "endTime": "2099-12-31 23:59:59"
+    },
+    {
+        "name": "test3",
+        "title": "220426 주일 2부 예배 - 본관",
+        "layout": "mainhall",
+        "startTime": "2022-04-10 23:59:12",
+        "endTime": "2099-12-31 23:59:59"
     }
 ]

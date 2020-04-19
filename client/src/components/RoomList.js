@@ -4,7 +4,10 @@ import { withStyles } from '@material-ui/core/styles';
 
 import { Grid, Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
 
+import axios from 'axios';
 import moment from 'moment';
+
+import Loading from './Loading';
 
 const styles = theme => ({
   root: {
@@ -39,16 +42,19 @@ const datetimeStrToHumanString = (datetimeStr) => (
 );
 
 class RoomList extends React.Component {
-  constructor(props) {
-    super(props);
+  state = {
+    loading: true,
+  };
+
+  componentDidMount = async () => {
+    const { data: rooms } = await axios.get('/api/rooms');
+    console.log(rooms);
     const availableSeatCounts = {};
-    this.props.rooms.forEach(room => {
+    rooms.forEach(room => {
       availableSeatCounts[room.name] = room.availableSeatCount;
     });
-    this.state = { availableSeatCounts };
-  }
+    this.setState({ loading: false, rooms, availableSeatCounts });
 
-  componentDidMount = () => {
     this.ws = new WebSocket(`ws://${window.location.host}/ws/`);
     this.ws.onmessage = evt => {
       const data = JSON.parse(evt.data);
@@ -67,8 +73,9 @@ class RoomList extends React.Component {
   };
 
   render = () => {
-    const { classes, rooms } = this.props;
-    const { availableSeatCounts } = this.state;
+    const { classes } = this.props;
+    const { rooms, availableSeatCounts } = this.state;
+    if (this.state.loading) return <Loading />;
     return (
       <Grid container className={classes.root}>
         <Grid item xs={12} className={classes.title}>
@@ -104,7 +111,6 @@ class RoomList extends React.Component {
 
 RoomList.propTypes = {
   classes: PropTypes.object.isRequired,
-  rooms: PropTypes.object.isRequired,
 };
 
 export default withStyles(styles)(RoomList);

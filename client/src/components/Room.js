@@ -100,7 +100,6 @@ class Room extends React.Component {
         return;
       }
       const hashedPassword = md5(password1);
-      console.log(hashedPassword);
       axios.post(`/api/rooms/${room}/${position}`, {
         booker: name,
         simplePassword: hashedPassword,
@@ -110,7 +109,10 @@ class Room extends React.Component {
           this.setState({ dialogOpen: false });
         }
       }).catch(err => {
-        console.error(err);
+        if (err.response && err.response.status === 403){
+          if (err.response.data.reason === 'time')
+            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
+        }
       });
     }
     else if (mode === 'modify' && !isDelete){
@@ -134,7 +136,10 @@ class Room extends React.Component {
         }
       }).catch(err => {
         if (err.response && err.response.status === 403){
-          this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
+          if (err.response.data.reason === 'password')
+            this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
+          if (err.response.data.reason === 'time')
+            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
         }
       });
     }
@@ -145,15 +150,16 @@ class Room extends React.Component {
           Authorization: `SimplePassword ${hashedPassword}`
         },
       }).then(res => {
-        console.log(res);
         if (res.status === 200){
           this.openSnackbar('예약이 정상적으로 삭제되었습니다.', 'success');
           this.setState({ dialogOpen: false });
         }
       }).catch(err => {
-        console.error(err);
         if (err.response && err.response.status === 403){
-          this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
+          if (err.response.data.reason === 'password')
+            this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
+          if (err.response.data.reason === 'time')
+            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
         }
       });
     }
@@ -276,7 +282,7 @@ class Room extends React.Component {
 
 Room.propTypes = {
   classes: PropTypes.object.isRequired,
-  room: PropTypes.object.isRequired,
+  room: PropTypes.string.isRequired,
 };
 
 export default withStyles(styles)(Room);
