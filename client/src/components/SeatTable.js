@@ -147,7 +147,7 @@ class SeatTable extends React.Component {
             <div className={classNames(classes.cell, classes.firstRow)}></div>
             <div style={{ display: 'inline-block', height: cellHeight, width: (cellWidth + 6) * colCount }}>
               <div className={classes.stageBox} style={{ width: (cellWidth + 6) * colCount }}>
-                강단
+                앞
               </div>
             </div>
           </div>
