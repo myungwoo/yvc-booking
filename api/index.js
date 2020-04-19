@@ -45,7 +45,7 @@ router.get('/rooms/:name/:position', async (req, res) => {
 router.post('/rooms/:name/:position', async (req, res) => {
   const { name, position } = req.params;
   const { booker, simplePassword } = req.body;
-  const room  = Rooms.getRoom(name);
+  const room = Rooms.getRoom(name);
   if (room === undefined)
     return res.sendStatus(404);
   if (!room.isValidPosition(position))
@@ -64,6 +64,7 @@ router.post('/rooms/:name/:position', async (req, res) => {
   // Booking이 이미 존재하면 403
   if (!created)
     return res.sendStatus(403);
+  req.wss.broadcastRoom(name, { room: name, position, booker });
   res.status(201).send(booking.dataValues);
 });
 
@@ -94,6 +95,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
   if (newSimplePassword !== undefined)
     booking.simplePassword = newSimplePassword;
   await booking.save();
+  req.wss.broadcastRoom(name, { room: name, position, booker });
   res.send(booking.dataValues);
 });
 
@@ -122,6 +124,7 @@ router.delete('/rooms/:name/:position', async (req, res) => {
   if (booking.dataValues.simplePassword !== simplePassword)
     return res.sendStatus(403);
   await booking.destroy();
+  req.wss.broadcastRoom(name, { room: name, position, deleted: true });
   res.send(booking.dataValues);
 });
 
