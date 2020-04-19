@@ -14,8 +14,11 @@ router.get('/server/info', (req, res) => {
   });
 });
 
-router.get('/rooms', (req, res) => {
-  res.send(Rooms.roomInfo);
+router.get('/rooms', async (req, res) => {
+  const rooms = await Promise.all(Rooms.roomInfo.map(async room => (
+    {...room, availableSeatCount: await room.availableSeatCount()}
+  )));
+  res.send(rooms);
 });
 
 router.get('/rooms/:name', async (req, res) => {
@@ -24,7 +27,8 @@ router.get('/rooms/:name', async (req, res) => {
   if (room === undefined)
     return res.sendStatus(404);
   const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
-  res.send({ ...room, bookings });
+  const availableSeatCount = await room.availableSeatCount();
+  res.send({ ...room, availableSeatCount, bookings});
 });
 
 router.get('/rooms/:name/:position', async (req, res) => {
@@ -59,13 +63,15 @@ router.post('/rooms/:name/:position', async (req, res) => {
     return res.sendStatus(400);
   const [booking, created] = await db.Booking.findOrCreate({
     where: { room: name, position },
-    defaults: { booker },
+    defaults: { booker, simplePassword },
   });
   // Booking이 이미 존재하면 403
   if (!created)
     return res.sendStatus(403);
-  req.wss.broadcastRoom(name, { room: name, position, booker });
   res.status(201).send(booking.dataValues);
+  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
+  req.wss.broadcastRoom(name, bookings);
+  req.wss.broadcastHall(name, await room.availableSeatCount());
 });
 
 router.put('/rooms/:name/:position', async (req, res) => {
@@ -95,13 +101,13 @@ router.put('/rooms/:name/:position', async (req, res) => {
   if (newSimplePassword !== undefined)
     booking.simplePassword = newSimplePassword;
   await booking.save();
-  req.wss.broadcastRoom(name, { room: name, position, booker });
   res.send(booking.dataValues);
+  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
+  req.wss.broadcastRoom(name, bookings);
 });
 
 router.delete('/rooms/:name/:position', async (req, res) => {
   const { name, position } = req.params;
-  const { simplePassword } = req.body;
   const room = Rooms.getRoom(name);
   if (room === undefined)
     return res.sendStatus(404);
@@ -112,20 +118,22 @@ router.delete('/rooms/:name/:position', async (req, res) => {
   // 예약 가능 시간에만 예약 가능하도록
   if (now < room.startTime || now > room.endTime)
     return res.sendStatus(400);
-  if (simplePassword === undefined)
-    return res.sendStatus(400);
   const booking = await db.Booking.findOne({
     where: { room: name, position },
   });
   // Booking이 존재하지 않으면 404
   if (booking === null)
     return res.sendStatus(404);
+
   // Booking이 가지고 있는 비밀번호와 다른 경우 403
-  if (booking.dataValues.simplePassword !== simplePassword)
+  const { authorization } = req.headers;
+  if (authorization === undefined || !authorization.startsWith('SimplePassword ') || authorization.split(' ')[1] !== booking.dataValues.simplePassword)
     return res.sendStatus(403);
   await booking.destroy();
-  req.wss.broadcastRoom(name, { room: name, position, deleted: true });
   res.send(booking.dataValues);
+  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
+  req.wss.broadcastRoom(name, bookings);
+  req.wss.broadcastHall(name, await room.availableSeatCount);
 });
 
 router.use('/', (req, res) => {

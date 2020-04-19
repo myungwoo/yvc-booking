@@ -1,6 +1,8 @@
 const moment = require('moment');
 const fs = require('fs');
 
+const db = require('../models');
+
 class Room {
   constructor(name, title, layout, startTime, endTime) {
     this.name = name;
@@ -8,6 +10,15 @@ class Room {
     this.layout = layout;
     this.startTime = moment(startTime);
     this.endTime = moment(endTime);
+
+    this.seatCount = 0;
+    layout.forEach(row => {
+      this.seatCount += (row.match(/o/g) || []).length;
+    });
+  }
+
+  async availableSeatCount() {
+    return this.seatCount - (await db.Booking.count({ where: { room: this.name }}));
   }
 
   isValidPosition(position) {

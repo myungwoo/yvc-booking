@@ -1,26 +1,35 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Switch, Route, Redirect } from 'react-router-dom';
 
-function App() {
-  return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
-  );
+import axios from 'axios';
+
+import Loading from './components/Loading';
+import RoomList from './components/RoomList';
+import Room from './components/Room';
+
+class App extends React.Component {
+  state = {
+    loading: true,
+    rooms: [],
+  };
+
+  componentDidMount = () => {
+    axios.get('/api/rooms').then(res => {
+      this.setState({ loading: false, rooms: res.data });
+    });
+  }
+
+  render = () => {
+    if (this.state.loading) return <Loading />;
+
+    return (
+      <Switch>
+        <Route exact path='/:room' component={props => <Room room={props.match.params.room} {...props} />} />
+        <Route exact path='/' component={props => <RoomList rooms={this.state.rooms} {...props} />} />
+        <Route path='/' render={() => <Redirect to="/" />} />
+      </Switch>
+    );
+  };
 }
 
 export default App;
