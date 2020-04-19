@@ -1,11 +1,13 @@
-sssss  o-o-  ooo
-sssss  oooo  ooo
-sssss  oooo  ooo
-ooxoo  oooo  ooo
-ooxoo  oooo  ooo
-ooxoo  oooo  ooo
-ooooo  oooo  ooo
-ooooo  oooo  ooo
-       oooo  ooo
-      poooo  poo
-      poooo  poo
+sssss  o-o-  o-o  
+sssss  -o-o  -o- p
+sssss  o-o-  o-o
+o-x-o  -o-o  -o- p
+-oxo-  o-o-  o-o
+o-x-o  -o-o  -o- p
+-o-o-  o-o-  o-o
+o-o-o  -o-o  -o- p
+       o-o-  o-o
+      p-o-o  -o- p
+       o-o-  o-o
+                
+      p p p p p 

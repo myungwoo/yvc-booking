@@ -2,9 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import { green, yellow, teal, orange } from '@material-ui/core/colors';
+import { green, yellow, teal, orange, indigo } from '@material-ui/core/colors';
 
-const firstRowCellHeight = 30;
+const firstRowCellHeight = 20;
 const cellHeight = 50;
 const cellWidth = 60;
 
@@ -14,6 +14,15 @@ const styles = {
     // overflow: 'auto',
     maxWidth: '100%',
     // maxHeight: 'calc(100vh - 240px)',
+  },
+  stageBox: {
+    display: 'table-cell',
+    textAlign: 'center',
+    verticalAlign: 'middle',
+    borderRadius: 5,
+    background: indigo[200],
+    height: cellHeight,
+    fontWeight: 'bold',
   },
   row: {
     textAlign: 'center',
@@ -116,7 +125,7 @@ class SeatTable extends React.Component {
     if (val === 's') return '스태프';
     if (val === ' ') return '';
     if (val === 'p') return '예비석';
-    if (val === '-') return '예약 불가';
+    if (val === '-') return '';
     const booking = bookings.filter(booking => booking.position === position)[0];
     if (booking !== undefined)
       return booking.booker;
@@ -133,6 +142,16 @@ class SeatTable extends React.Component {
     const colCount = layout[0].length;
     return (
       <div className={classes.root}>
+        <div className={classes.row}>
+          <div className={classes.rowWrapper}>
+            <div className={classNames(classes.cell, classes.firstRow)}></div>
+            <div style={{ display: 'inline-block', height: cellHeight, width: (cellWidth + 6) * colCount }}>
+              <div className={classes.stageBox} style={{ width: (cellWidth + 6) * colCount }}>
+                강단
+              </div>
+            </div>
+          </div>
+        </div>
         <div className={classes.row}>
           <div className={classes.rowWrapper}>
             <div className={classNames(classes.cell, classes.firstRow)}></div>
