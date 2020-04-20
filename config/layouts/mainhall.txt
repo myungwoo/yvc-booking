@@ -7,7 +7,7 @@ o-x-o  -o-o  -o- p
 -o-o-  o-o-  o-o
 o-o-o  -o-o  -o- p
        o-o-  o-o
-      p-o-o  -o- p
+j     p-o-o  -o- p
        o-o-  o-o
-                
-      p p p p p 
+j               
+ j j  p p p p p 

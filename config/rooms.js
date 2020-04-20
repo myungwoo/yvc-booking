@@ -30,7 +30,7 @@ class Room {
     const row = this.layout[r-1];
     if (row === undefined) return false;
     const val = row[c-1];
-    if (val !== 'o') return false;
+    if (!'opj'.includes(val)) return false;
     return true;
   }
 }

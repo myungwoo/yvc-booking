@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import { green, yellow, blueGrey, red, grey } from '@material-ui/core/colors';
+import { green, yellow, blueGrey, red, grey, pink } from '@material-ui/core/colors';
 
 const firstRowCellHeight = 20;
 const cellHeight = 50;
@@ -68,12 +68,17 @@ const styles = {
   },
   spareSeat: {
     background: yellow[400],
+    cursor: 'pointer',
   },
   unavailableSeat: {
     background: green[100],
   },
   availableSeat: {
     background: green[400],
+    cursor: 'pointer',
+  },
+  momSeat: {
+    background: pink[200],
     cursor: 'pointer',
   },
   bookedSeat: {
@@ -87,8 +92,11 @@ const styles = {
     // fontWeight: 'bold',
     width: cellWidth,
     height: cellHeight,
+    whiteSpace: 'pre-line',
   },
 };
+
+const isBookableSeat = c => 'opj'.includes(c);
 
 class SeatTable extends React.Component {
   getSeatChar = position => {
@@ -112,6 +120,7 @@ class SeatTable extends React.Component {
     if (val === ' ') return classes.noSeat;
     if (val === 'p') return classes.spareSeat;
     if (val === '-') return classes.unavailableSeat;
+    if (val === 'j') return classes.momSeat;
     if (bookings.filter(booking => booking.position === position).length > 0)
       return classes.bookedSeat;
     return classes.availableSeat;
@@ -124,11 +133,15 @@ class SeatTable extends React.Component {
     if (val === 'x') return '';
     if (val === 's') return '스태프';
     if (val === ' ') return '';
-    if (val === 'p') return '예비석';
     if (val === '-') return '';
     const booking = bookings.filter(booking => booking.position === position)[0];
-    if (booking !== undefined)
+    if (booking !== undefined){
+      if (val === 'p') return `간이의자\n${booking.booker}`;
+      if (val === 'j') return `자모실\n${booking.booker}`;
       return booking.booker;
+    }
+    if (val === 'p') return '간이의자\n예약가능';
+    if (val === 'j') return '자모실\n예약가능';
     return '예약 가능';
   };
 
@@ -172,7 +185,7 @@ class SeatTable extends React.Component {
                 <div
                   key={col}
                   className={classNames(classes.cell, classes.seat, this.getSeatClassName(`${String.fromCharCode(65+row)}${col+1}`))}
-                  onClick={this.getSeatChar(`${String.fromCharCode(65+row)}${col+1}`) === 'o' ? this.onClick(`${String.fromCharCode(65+row)}${col+1}`) : undefined}
+                  onClick={isBookableSeat(this.getSeatChar(`${String.fromCharCode(65+row)}${col+1}`)) ? this.onClick(`${String.fromCharCode(65+row)}${col+1}`) : undefined}
                 >
                   <div className={classes.seatText}>
                     {this.getSeatText(`${String.fromCharCode(65+row)}${col+1}`)}
