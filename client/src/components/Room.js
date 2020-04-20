@@ -19,6 +19,8 @@ import moment from 'moment';
 import Loading from './Loading';
 import SeatTable from './SeatTable';
 
+import serverTime from '../serverTime';
+
 const styles = theme => ({
   root: {
     flexGrow: 1,
@@ -60,13 +62,14 @@ class Room extends React.Component {
     snackbarOpen: false,
     snackbarMessage: '',
     snackbarAlertSeverity: 'success',
+    currentServerTime: serverTime.getNow(),
   };
 
   componentDidMount = async () => {
     try{
       const res = await axios.get(`/api/rooms/${this.props.room}`);
       const { bookings, ...room } = res.data;
-      if (moment() < moment(room.startTime)) return this.redirect('/');
+      if (serverTime.getNow() < moment(room.startTime)) return this.redirect('/');
       this.setState({
         loading: false,
         room,
@@ -80,10 +83,15 @@ class Room extends React.Component {
       const bookings = JSON.parse(evt.data);
       this.setState({ bookings });
     };
+    this.timer = setInterval(() => {
+      this.setState({ currentServerTime: serverTime.getNow() });
+    }, 100);
   };
 
   componentWillUnmount = () => {
     if (this.ws) this.ws.close();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
   };
 
   redirect = url => {
@@ -226,6 +234,10 @@ class Room extends React.Component {
           <Typography variant="h4">YVC 좌석 예약 시스템</Typography>
           <Typography variant="h6" color="textSecondary">{room.title}</Typography>
           <Typography variant="body2" color="textSecondary">예배 시작 시간: {datetimeStrToHumanString(room.endTime)}</Typography>
+          <Typography variant="body2" color="textSecondary">
+            현재 서버 시간:
+            {this.state.currentServerTime.format('YYYY년 MM월 DD일 HH시 mm분 ss초')}
+          </Typography>
         </Grid>
         <Grid item xs={12}>
           <Card variant="outlined">

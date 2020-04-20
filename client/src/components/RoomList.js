@@ -11,6 +11,8 @@ import moment from 'moment';
 
 import Loading from './Loading';
 
+import serverTime from '../serverTime';
+
 const styles = theme => ({
   root: {
     flexGrow: 1,
@@ -57,6 +59,7 @@ class RoomList extends React.Component {
     snackbarOpen: false,
     snackbarMessage: '',
     snackbarAlertSeverity: 'success',
+    currentServerTime: serverTime.getNow(),
   };
 
   componentDidMount = async () => {
@@ -74,10 +77,15 @@ class RoomList extends React.Component {
       availableSeatCounts[data.room] = data.availableSeatCount;
       this.setState({ availableSeatCounts });
     };
+    this.timer = setInterval(() => {
+      this.setState({ currentServerTime: serverTime.getNow() });
+    }, 100);
   };
 
   componentWillUnmount = () => {
-    this.ws.close();
+    if (this.ws) this.ws.close();
+    if (this.timer) clearInterval(this.timer);
+    this.timer = null;
   };
 
   moveToRoom = (room) => () => {
@@ -95,12 +103,16 @@ class RoomList extends React.Component {
   render = () => {
     const { classes } = this.props;
     const { rooms, availableSeatCounts } = this.state;
-    const now = moment();
+    const now = serverTime.getNow();
     if (this.state.loading) return <Loading />;
     return (
       <Grid container className={classes.root}>
         <Grid item xs={12} className={classes.title}>
-          <Typography variant="h4">YVC 좌석 예약 시스템</Typography>
+          <Typography variant="h4" gutterBottom>YVC 좌석 예약 시스템</Typography>
+          <Typography variant="body2" color="textSecondary">
+            현재 서버 시간:
+            {this.state.currentServerTime.format('YYYY년 MM월 DD일 HH시 mm분 ss초')}
+          </Typography>
         </Grid>
         <Grid item xs={12} md={3}></Grid>
         <Grid item xs={12} md={6}>
@@ -124,7 +136,7 @@ class RoomList extends React.Component {
                   예약 가능 시간이 아닙니다.
                 </Typography>}
                 <Typography variant="body2" component="p" gutterBottom>
-                  {now < moment(room.startTime) && [`예약 시작 시간: ${datetimeStrToHumanString(room.startTime)}`, <br />]}
+                  {now < moment(room.startTime) && [`예약 시작 시간: ${datetimeStrToHumanString(room.startTime)}`, <br key={1} />]}
                   예배 시작 시간: {datetimeStrToHumanString(room.endTime)}
                 </Typography>
                 <Typography variant="body2" component="p">
