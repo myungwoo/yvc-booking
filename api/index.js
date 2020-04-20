@@ -57,8 +57,10 @@ router.post('/rooms/:name/:position', async (req, res) => {
     
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime || now > room.endTime)
-    return res.status(403).send({ reason: 'time' });
+  if (now < room.startTime)
+    return res.status(403).send({ reason: 'startTime' });
+    if (now > room.endTime)
+    return res.status(403).send({ reason: 'endTime' });
   if (booker === undefined || simplePassword === undefined)
     return res.sendStatus(400);
   const [booking, created] = await db.Booking.findOrCreate({
@@ -84,8 +86,10 @@ router.put('/rooms/:name/:position', async (req, res) => {
     return res.sendStatus(404);
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime || now > room.endTime)
-    return res.status(403).send({ reason: 'time' });
+  if (now < room.startTime)
+    return res.status(403).send({ reason: 'startTime' });
+    if (now > room.endTime)
+    return res.status(403).send({ reason: 'endTime' });
   if (booker === undefined || simplePassword === undefined)
     return res.sendStatus(400);
   const booking = await db.Booking.findOne({
@@ -116,8 +120,10 @@ router.delete('/rooms/:name/:position', async (req, res) => {
 
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime || now > room.endTime)
-    return res.status(403).send({ reason: 'time' });
+  if (now < room.startTime)
+    return res.status(403).send({ reason: 'startTime' });
+    if (now > room.endTime)
+    return res.status(403).send({ reason: 'endTime' });
   const booking = await db.Booking.findOne({
     where: { room: name, position },
   });

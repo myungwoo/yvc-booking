@@ -2,7 +2,9 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import { withStyles } from '@material-ui/core/styles';
 
-import { Grid, Typography, Card, CardContent, CardActions, Button } from '@material-ui/core';
+import { Grid, Typography, Card, CardContent, CardActions, Button, Snackbar } from '@material-ui/core';
+import { Alert } from '@material-ui/lab';
+import { red, blue } from '@material-ui/core/colors';
 
 import axios from 'axios';
 import moment from 'moment';
@@ -12,7 +14,15 @@ import Loading from './Loading';
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    padding: theme.spacing(6),
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(0.5),
+    },
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1),
+    },
+    [theme.breakpoints.up('md')]: {
+      padding: theme.spacing(6),
+    },
   },
   title: {
     textAlign: 'center',
@@ -44,11 +54,13 @@ const datetimeStrToHumanString = (datetimeStr) => (
 class RoomList extends React.Component {
   state = {
     loading: true,
+    snackbarOpen: false,
+    snackbarMessage: '',
+    snackbarAlertSeverity: 'success',
   };
 
   componentDidMount = async () => {
     const { data: rooms } = await axios.get('/api/rooms');
-    console.log(rooms);
     const availableSeatCounts = {};
     rooms.forEach(room => {
       availableSeatCounts[room.name] = room.availableSeatCount;
@@ -72,9 +84,18 @@ class RoomList extends React.Component {
     this.props.history.push(`/${room.name}`);
   };
 
+  openSnackbar = (message, severity) => () => {
+    this.setState({ snackbarOpen: true, snackbarMessage: message, snackbarAlertSeverity: severity });
+  };
+  handleSnackbarClose = (event, reason) => {
+    if (reason === 'clickaway') return;
+    this.setState({ snackbarOpen: false });
+  };
+
   render = () => {
     const { classes } = this.props;
     const { rooms, availableSeatCounts } = this.state;
+    const now = moment();
     if (this.state.loading) return <Loading />;
     return (
       <Grid container className={classes.root}>
@@ -84,14 +105,27 @@ class RoomList extends React.Component {
         <Grid item xs={12} md={3}></Grid>
         <Grid item xs={12} md={6}>
           {rooms.map((room, idx) => (
-            <Card key={idx} className={classes.card} variant="outlined" onClick={this.moveToRoom(room)}>
+            <Card
+              key={idx}
+              className={classes.card}
+              variant="outlined"
+              onClick={
+                now >= moment(room.startTime) ? this.moveToRoom(room) : this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error')
+              }
+            >
               <CardContent className={classes.cardContent}>
                 <Typography gutterBottom variant="h6" component="h5">
                   {room.title}
                 </Typography>
+                {now > moment(room.endTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: blue[800] }}>
+                  예배가 이미 시작했습니다.
+                </Typography>}
+                {now < moment(room.startTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: red[800] }}>
+                  예약 가능 시간이 아닙니다.
+                </Typography>}
                 <Typography variant="body2" component="p" gutterBottom>
-                  예약 시작 시간: {datetimeStrToHumanString(room.startTime)}<br />
-                  예약 끝나는 시간: {datetimeStrToHumanString(room.endTime)}
+                  {now < moment(room.startTime) && [`예약 시작 시간: ${datetimeStrToHumanString(room.startTime)}`, <br />]}
+                  예배 시작 시간: {datetimeStrToHumanString(room.endTime)}
                 </Typography>
                 <Typography variant="body2" component="p">
                   실시간 잔여 좌석: {availableSeatCounts[room.name]} / {room.seatCount}
@@ -104,6 +138,11 @@ class RoomList extends React.Component {
           ))}
         </Grid>
         <Grid item xs={12} md={3}></Grid>
+        <Snackbar open={this.state.snackbarOpen} autoHideDuration={6000} onClose={this.handleSnackbarClose}>
+          <Alert onClose={this.handleSnackbarClose} severity={this.state.snackbarAlertSeverity}>
+            {this.state.snackbarMessage}
+          </Alert>
+        </Snackbar>
       </Grid>
     );
   };

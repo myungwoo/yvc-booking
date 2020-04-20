@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import { green, yellow, teal, orange, indigo } from '@material-ui/core/colors';
+import { green, yellow, blueGrey, red, grey } from '@material-ui/core/colors';
 
 const firstRowCellHeight = 20;
 const cellHeight = 50;
@@ -20,7 +20,7 @@ const styles = {
     textAlign: 'center',
     verticalAlign: 'middle',
     borderRadius: 5,
-    background: indigo[200],
+    background: grey[300],
     height: cellHeight,
     fontWeight: 'bold',
   },
@@ -30,7 +30,7 @@ const styles = {
     whiteSpace: 'nowrap',
   },
   rowWrapper: {
-    padding: 5,
+    padding: 0,
     display: 'inline-block',
   },
   firstRow: {
@@ -64,20 +64,20 @@ const styles = {
     background: '#555',
   },
   staffSeat: {
-    background: teal[400],
+    background: blueGrey[200],
   },
   spareSeat: {
     background: yellow[400],
   },
   unavailableSeat: {
-    background: green[50],
+    background: green[100],
   },
   availableSeat: {
     background: green[400],
     cursor: 'pointer',
   },
   bookedSeat: {
-    background: orange[400],
+    background: red[200],
     cursor: 'pointer',
   },
   seatText: {

@@ -14,6 +14,7 @@ import ArrowBackIcon from '@material-ui/icons/ArrowBack';
 
 import axios from 'axios';
 import md5 from 'md5';
+import moment from 'moment';
 
 import Loading from './Loading';
 import SeatTable from './SeatTable';
@@ -21,7 +22,15 @@ import SeatTable from './SeatTable';
 const styles = theme => ({
   root: {
     flexGrow: 1,
-    padding: theme.spacing(6),
+    [theme.breakpoints.down('xs')]: {
+      padding: theme.spacing(0.5),
+    },
+    [theme.breakpoints.down('sm')]: {
+      padding: theme.spacing(1),
+    },
+    [theme.breakpoints.up('md')]: {
+      padding: theme.spacing(6),
+    },
   },
   title: {
     marginBottom: theme.spacing(2),
@@ -48,28 +57,28 @@ class Room extends React.Component {
     snackbarAlertSeverity: 'success',
   };
 
-  componentDidMount = () => {
-    this.ws = new WebSocket(`ws://${window.location.host}/ws/${this.props.room}`);
-    this.ws.onmessage = evt => {
-      const bookings = JSON.parse(evt.data);
-      this.setState({ bookings });
-    };
-    axios.get(`/api/rooms/${this.props.room}`).then(res => {
+  componentDidMount = async () => {
+    try{
+      const res = await axios.get(`/api/rooms/${this.props.room}`);
       const { bookings, ...room } = res.data;
+      if (moment() < moment(room.startTime)) return this.redirect('/');
       this.setState({
         loading: false,
         room,
         bookings,
       });
-    }).catch(err => {
-      console.error(err);
-      const { response: res } = err;
-      if (res.status === 404) this.redirect('/');
-    });
+    }catch(err){
+      if (err.response && err.response.status === 404) return this.redirect('/');
+    }
+    this.ws = new WebSocket(`ws://${window.location.host}/ws/${this.props.room}`);
+    this.ws.onmessage = evt => {
+      const bookings = JSON.parse(evt.data);
+      this.setState({ bookings });
+    };
   };
 
   componentWillUnmount = () => {
-    this.ws.close();
+    if (this.ws) this.ws.close();
   };
 
   redirect = url => {
@@ -112,6 +121,8 @@ class Room extends React.Component {
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'time')
             this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
+          if (err.response.data.reason === 'exists')
+            this.openSnackbar('이미 예약된 좌석입니다.', 'error');
         }
       });
     }
@@ -138,8 +149,10 @@ class Room extends React.Component {
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'password')
             this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
-          if (err.response.data.reason === 'time')
-            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
+          if (err.response.data.reason === 'startTime')
+            this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
+          if (err.response.data.reason === 'endTime')
+            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
         }
       });
     }
@@ -158,8 +171,10 @@ class Room extends React.Component {
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'password')
             this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
-          if (err.response.data.reason === 'time')
-            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
+          if (err.response.data.reason === 'startTime')
+            this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
+          if (err.response.data.reason === 'endTime')
+            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
         }
       });
     }
@@ -217,6 +232,7 @@ class Room extends React.Component {
               value={this.state.txtName}
               onChange={this.handleTextChange('txtName')}
               fullWidth
+              required
               helperText={
                 this.state.dialogMode === 'create' ? '작성한 이름으로 예악됩니다.' : '예약자 이름을 수정할 수 있습니다.'
               }
@@ -229,30 +245,41 @@ class Room extends React.Component {
               value={this.state.txtPassword}
               onChange={this.handleTextChange('txtPassword')}
               fullWidth
+              required
               helperText="예약시 작성한 비밀번호를 입력하세요."
             />}
             <TextField
               margin="dense"
               id="password1"
-              label="비밀번호"
+              label={
+                this.state.dialogMode === 'create' ?
+                  '비밀번호' :
+                  '수정할 비밀번호'
+              }
               type="password"
               value={this.state.txtPassword1}
               onChange={this.handleTextChange('txtPassword1')}
               fullWidth
+              required={this.state.dialogMode === 'create'}
               helperText={
                 this.state.dialogMode === 'create' ?
                   '작성한 비밀번호를 통해 예약을 수정 혹은 삭제할 수 있습니다.' :
-                  '비밀번호를 수정할 경우 작성하세요.'
+                  '비밀번호를 수정하지 않을 경우 비워주세요.'
               }
             />
             <TextField
               margin="dense"
               id="password2"
-              label="비밀번호 확인"
+              label={
+                this.state.dialogMode === 'create' ?
+                  '비밀번호 확인' :
+                  '수정할 비밀번호 확인'
+              }
               value={this.state.txtPassword2}
               onChange={this.handleTextChange('txtPassword2')}
               type="password"
               fullWidth
+              required={this.state.dialogMode === 'create'}
             />
           </DialogContent>
           <DialogActions>
