@@ -46,6 +46,10 @@ const styles = theme => ({
   },
 });
 
+const datetimeStrToHumanString = (datetimeStr) => (
+  moment(datetimeStr).format('YYYY년 MM월 DD일 HH시 mm분')
+);
+
 class Room extends React.Component {
   state = {
     loading: true,
@@ -119,8 +123,10 @@ class Room extends React.Component {
         }
       }).catch(err => {
         if (err.response && err.response.status === 403){
-          if (err.response.data.reason === 'time')
-            this.openSnackbar('예약 가능 시간이 아닙니다.', 'error');
+          if (err.response.data.reason === 'startTime')
+            this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
+          if (err.response.data.reason === 'endTime')
+            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
           if (err.response.data.reason === 'exists')
             this.openSnackbar('이미 예약된 좌석입니다.', 'error');
         }
@@ -201,6 +207,7 @@ class Room extends React.Component {
         <Grid item xs={12} className={classNames(classes.title, classes.textCenter)}>
           <Typography variant="h4">YVC 좌석 예약 시스템</Typography>
           <Typography variant="h6" color="textSecondary">{room.title}</Typography>
+          <Typography variant="body2" color="textSecondary">예배 시작 시간: {datetimeStrToHumanString(room.endTime)}</Typography>
         </Grid>
         <Grid item xs={12}>
           <Card variant="outlined">
@@ -233,6 +240,7 @@ class Room extends React.Component {
               onChange={this.handleTextChange('txtName')}
               fullWidth
               required
+              inputProps={{ maxLength: 8 }}
               helperText={
                 this.state.dialogMode === 'create' ? '작성한 이름으로 예악됩니다.' : '예약자 이름을 수정할 수 있습니다.'
               }
@@ -246,6 +254,7 @@ class Room extends React.Component {
               onChange={this.handleTextChange('txtPassword')}
               fullWidth
               required
+              inputProps={{ maxLength: 15 }}
               helperText="예약시 작성한 비밀번호를 입력하세요."
             />}
             <TextField
@@ -261,6 +270,7 @@ class Room extends React.Component {
               onChange={this.handleTextChange('txtPassword1')}
               fullWidth
               required={this.state.dialogMode === 'create'}
+              inputProps={{ maxLength: 15 }}
               helperText={
                 this.state.dialogMode === 'create' ?
                   '작성한 비밀번호를 통해 예약을 수정 혹은 삭제할 수 있습니다.' :
@@ -280,6 +290,7 @@ class Room extends React.Component {
               type="password"
               fullWidth
               required={this.state.dialogMode === 'create'}
+              inputProps={{ maxLength: 15 }}
             />
           </DialogContent>
           <DialogActions>
