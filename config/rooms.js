@@ -39,7 +39,7 @@ class Rooms {
   constructor() {
     // config에서 room 정보 읽기
     this.roomInfo = require('../config/rooms.json').map(room => {
-      const rows = fs.readFileSync(`./config/layouts/${room.layout}.txt`).toString().trim().split('\n');
+      const rows = fs.readFileSync(`./config/layouts/${room.layout}.txt`).toString().split('\n');
       const col = Math.max.apply(null, rows.map(e => e.length));
       const layout = rows.map(row => {
         // 사람의 실수로 줄 별로 칸 수가 통일 되지 않은 경우 뒤에 공백을 추가하여 맞춰준다
