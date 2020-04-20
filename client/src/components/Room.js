@@ -78,7 +78,7 @@ class Room extends React.Component {
     }catch(err){
       if (err.response && err.response.status === 404) return this.redirect('/');
     }
-    this.ws = new WebSocket(`ws://${window.location.host}/ws/${this.props.room}`);
+    this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/${this.props.room}`);
     this.ws.onmessage = evt => {
       const bookings = JSON.parse(evt.data);
       this.setState({ bookings });

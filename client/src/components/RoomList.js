@@ -70,7 +70,7 @@ class RoomList extends React.Component {
     });
     this.setState({ loading: false, rooms, availableSeatCounts });
 
-    this.ws = new WebSocket(`ws://${window.location.host}/ws/`);
+    this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/`);
     this.ws.onmessage = evt => {
       const data = JSON.parse(evt.data);
       const availableSeatCounts = {...this.state.availableSeatCounts};
