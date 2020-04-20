@@ -13,7 +13,7 @@ class Room {
 
     this.seatCount = 0;
     layout.forEach(row => {
-      this.seatCount += (row.match(/o/g) || []).length;
+      this.seatCount += (row.match(/[opj]/g) || []).length;
     });
   }
 
