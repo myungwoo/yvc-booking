@@ -4,7 +4,7 @@ class Loading extends React.Component {
   render() {
     return (
       <div style={{
-        backgroundColor: 'rgb(255, 255, 255)',
+        backgroundColor: 'rgba(0, 0, 0, 0.15)',
         width: '100%', height: '100%', zIndex: 10000,
         position: 'fixed', top: 0, left: 0,
         textAlign: 'center',

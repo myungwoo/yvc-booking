@@ -53,6 +53,7 @@ const datetimeStrToHumanString = (datetimeStr) => (
 class Room extends React.Component {
   state = {
     loading: true,
+    subLoading: false,
     dialogMode: 'create',
     dialogOpen: false,
     currentPosition: 'A1',
@@ -107,21 +108,28 @@ class Room extends React.Component {
   handleDialogConfirm = isDelete => () => {
     const { room } = this.props;
     const { dialogMode: mode, txtName: name, txtPassword: password, txtPassword1: password1, txtPassword2: password2, currentPosition: position } = this.state;
+    if (name === '')
+      return this.openSnackbar('예약자 이름이 비어있습니다.', 'error');
     if (mode === 'create'){
+      if (password1 === '')
+        return this.openSnackbar('비밀번호가 비어있습니다.', 'error');
       if (password1 !== password2){
         this.openSnackbar('비밀번호와 비밀번호 확인이 다릅니다.', 'error');
         return;
       }
+      this.setState({ subLoading: true });
       const hashedPassword = md5(password1);
       axios.post(`/api/rooms/${room}/${position}`, {
         booker: name,
         simplePassword: hashedPassword,
       }).then(res => {
+        this.setState({ subLoading: false });
         if (res.status === 201){
           this.openSnackbar('예약이 정상적으로 완료되었습니다.', 'success');
           this.setState({ dialogOpen: false });
         }
       }).catch(err => {
+        this.setState({ subLoading: false });
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'startTime')
             this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
@@ -133,6 +141,9 @@ class Room extends React.Component {
       });
     }
     else if (mode === 'modify' && !isDelete){
+      if (password === '')
+        return this.openSnackbar('비밀번호가 비어있습니다.', 'error');
+      this.setState({ subLoading: true });
       const hashedPassword = md5(password);
       let hashedNewPassword = undefined;
       if (password1 !== ''){
@@ -147,11 +158,13 @@ class Room extends React.Component {
         simplePassword: hashedPassword,
         newSimplePassword: hashedNewPassword,
       }).then(res => {
+        this.setState({ subLoading: false });
         if (res.status === 200){
           this.openSnackbar('예약이 정상적으로 수정되었습니다.', 'success');
           this.setState({ dialogOpen: false });
         }
       }).catch(err => {
+        this.setState({ subLoading: false });
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'password')
             this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
@@ -163,17 +176,22 @@ class Room extends React.Component {
       });
     }
     else if (mode === 'modify' && isDelete){
+      if (password === '')
+        return this.openSnackbar('비밀번호가 비어있습니다.', 'error');
+      this.setState({ subLoading: true });
       const hashedPassword = md5(password);
       axios.delete(`/api/rooms/${room}/${position}`, {
         headers: {
           Authorization: `SimplePassword ${hashedPassword}`
         },
       }).then(res => {
+        this.setState({ subLoading: false });
         if (res.status === 200){
           this.openSnackbar('예약이 정상적으로 삭제되었습니다.', 'success');
           this.setState({ dialogOpen: false });
         }
       }).catch(err => {
+        this.setState({ subLoading: false });
         if (err.response && err.response.status === 403){
           if (err.response.data.reason === 'password')
             this.openSnackbar('비밀번호가 틀렸습니다.', 'error');
@@ -313,6 +331,7 @@ class Room extends React.Component {
         <Fab color="primary" aria-label="back" className={classes.fab} onClick={this.moveTo('/')}>
           <ArrowBackIcon />
         </Fab>
+        {this.state.subLoading && <Loading />}
       </Grid>
     );
   };
