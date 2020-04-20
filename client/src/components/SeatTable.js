@@ -140,8 +140,8 @@ class SeatTable extends React.Component {
       if (val === 'j') return `자모실\n${booking.booker}`;
       return booking.booker;
     }
-    if (val === 'p') return '간이의자\n예약가능';
-    if (val === 'j') return '자모실\n예약가능';
+    if (val === 'p') return '간이의자\n예약 가능';
+    if (val === 'j') return '자모실\n예약 가능';
     return '예약 가능';
   };
 
