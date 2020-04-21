@@ -9,6 +9,6 @@
 o-o  p-o-o- o-o
 j     o-o-o -o-
      p-o-xx o-o
-j       p
+j       p   p p
  j j
        p p p p p
