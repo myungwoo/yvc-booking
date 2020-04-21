@@ -2,7 +2,7 @@ import React from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
 import { withStyles } from '@material-ui/core/styles';
-import { green, yellow, blueGrey, red, grey, pink } from '@material-ui/core/colors';
+import { green, yellow, blueGrey, red, grey, pink, blue } from '@material-ui/core/colors';
 
 const firstRowCellHeight = 20;
 const cellHeight = 50;
@@ -81,6 +81,9 @@ const styles = {
     background: pink[200],
     cursor: 'pointer',
   },
+  broadcastSeat: {
+    background: blue[400],
+  },
   bookedSeat: {
     background: red[200],
     cursor: 'pointer',
@@ -120,6 +123,7 @@ class SeatTable extends React.Component {
     if (val === ' ') return classes.noSeat;
     if (val === 'p') return classes.spareSeat;
     if (val === '-') return classes.unavailableSeat;
+    if (val === 'b') return classes.broadcastSeat;
     if (val === 'j') return classes.momSeat;
     if (bookings.filter(booking => booking.position === position).length > 0)
       return classes.bookedSeat;
@@ -134,6 +138,7 @@ class SeatTable extends React.Component {
     if (val === 's') return '스태프';
     if (val === ' ') return '';
     if (val === '-') return '';
+    if (val === 'b') return '방송실';
     const booking = bookings.filter(booking => booking.position === position)[0];
     if (booking !== undefined){
       if (val === 'p') return `간이의자\n${booking.booker}`;
