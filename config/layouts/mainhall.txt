@@ -6,9 +6,9 @@
  o-o-o -o-o -o-p
   o-o- o-o- o-o
        -o-o -o-p
-o-o    o-o- o-o
-      o-o-o -o-
-j    p-o-o- o-o
-      o-oxx -o-
-j
- j j   p p p p p
+o-o  p-o-o- o-o
+j     o-o-o -o-
+     p-o-xx o-o
+j       p
+ j j
+       p p p p p
