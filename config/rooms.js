@@ -38,7 +38,8 @@ class Room {
 class Rooms {
   constructor() {
     // config에서 room 정보 읽기
-    this.roomInfo = require('../config/rooms.json').map(room => {
+    const env = process.env.NODE_ENV || 'development';
+    this.roomInfo = require('../config/rooms.json')[env].map(room => {
       const rows = fs.readFileSync(`./config/layouts/${room.layout}.txt`).toString().split('\n');
       const col = Math.max.apply(null, rows.map(e => e.length));
       const layout = rows.map(row => {
