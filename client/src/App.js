@@ -23,7 +23,7 @@ class App extends React.Component {
       <Switch>
         <Route exact path='/:room' component={props => <Room room={props.match.params.room} {...props} />} />
         <Route exact path='/' component={RoomList} />
-        <Route path='/' render={() => <Redirect to="/" />} />
+        <Redirect to="/" />
       </Switch>
     );
   };

@@ -1,6 +1,7 @@
 const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
+const path = require('path');
 
 const app = express();
 const server = http.createServer(app);
@@ -18,8 +19,12 @@ app.use('/', (req, res, next) => {
 
 app.use('/api', require('./api'));
 
-if (process.env.NODE_ENV === 'production')
+if (process.env.NODE_ENV === 'production'){
   app.use('/', express.static('client/build'));
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  });
+}
 
 process.on('unhandledRejection', error => {
   console.error('unhandledRejection', error.message); // eslint-disable-line no-console
