@@ -121,12 +121,12 @@ class SeatTable extends React.Component {
     if (val === 'x') return classes.invalidSeat;
     if (val === 's') return classes.staffSeat;
     if (val === ' ') return classes.noSeat;
-    if (val === 'p') return classes.spareSeat;
-    if (val === '-') return classes.unavailableSeat;
     if (val === 'b') return classes.broadcastSeat;
-    if (val === 'j') return classes.momSeat;
+    if (val === '-') return classes.unavailableSeat;
     if (bookings.filter(booking => booking.position === position).length > 0)
       return classes.bookedSeat;
+    if (val === 'j') return classes.momSeat;
+    if (val === 'p') return classes.spareSeat;
     return classes.availableSeat;
   };
 
