@@ -2,6 +2,12 @@ const WebSocket = require('ws');
 const url = require('url');
 
 const Rooms = require('./config/rooms');
+const db = require('./models');
+
+const removeBookingPasswordProperty = (booking) => {
+  const { simplePassword, ...bookingWithoutPassword } = booking; // eslint-disable-line no-unused-vars
+  return bookingWithoutPassword;
+};
 
 module.exports = server => {
   const wss = new WebSocket.Server({ server });
@@ -9,18 +15,24 @@ module.exports = server => {
   Rooms.roomInfo.forEach(room => {
     wss.roomClients[room.name] = new Set();
   });
-  wss.broadcastHall = (room, availableSeatCount) => {
+  wss.broadcastHall = async (name) => {
+    const room = Rooms.getRoom(name);
+    if (wss.roomClients[''] === undefined || room === undefined)
+      return;
+    const availableSeatCount = await room.availableSeatCount();
     wss.roomClients[''].forEach(ws => {
       ws.send(JSON.stringify({
-        room,
+        room: name,
         availableSeatCount,
       }));
     });
   };
-  wss.broadcastRoom = (room, bookings) => {
-    if (wss.roomClients[room] === undefined)
+  wss.broadcastRoom = async (name) => {
+    const room = Rooms.getRoom(name);
+    if (wss.roomClients[name] === undefined || room === undefined)
       return;
-    wss.roomClients[room].forEach(ws => {
+    const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
+    wss.roomClients[name].forEach(ws => {
       ws.send(JSON.stringify(bookings));
     });
   };

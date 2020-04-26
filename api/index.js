@@ -71,9 +71,8 @@ router.post('/rooms/:name/:position', async (req, res) => {
   if (!created)
     return res.status(403).send({ reason: 'exists' });
   res.status(201).send(booking.dataValues);
-  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
-  req.wss.broadcastRoom(name, bookings);
-  req.wss.broadcastHall(name, await room.availableSeatCount());
+  req.wss.broadcastRoom(name);
+  req.wss.broadcastHall(name);
 });
 
 router.put('/rooms/:name/:position', async (req, res) => {
@@ -106,8 +105,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
     booking.simplePassword = newSimplePassword;
   await booking.save();
   res.send(booking.dataValues);
-  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
-  req.wss.broadcastRoom(name, bookings);
+  req.wss.broadcastRoom(name);
 });
 
 router.delete('/rooms/:name/:position', async (req, res) => {
@@ -137,9 +135,8 @@ router.delete('/rooms/:name/:position', async (req, res) => {
     return res.status(403).send({ reason: 'password' });
   await booking.destroy();
   res.send(booking.dataValues);
-  const bookings = (await db.Booking.findAll({ where: { room: name } })).map(e => removeBookingPasswordProperty(e.dataValues));
-  req.wss.broadcastRoom(name, bookings);
-  req.wss.broadcastHall(name, await room.availableSeatCount);
+  req.wss.broadcastRoom(name);
+  req.wss.broadcastHall(name);
 });
 
 router.use('/', (req, res) => {
