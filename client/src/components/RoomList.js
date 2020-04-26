@@ -62,30 +62,39 @@ class RoomList extends React.Component {
     currentServerTime: serverTime.getNow(),
   };
 
-  componentDidMount = async () => {
+  loadRoomList = async withLoading => {
+    if (withLoading) this.setState({ loading: true });
     const { data: rooms } = await axios.get('/api/rooms');
     const availableSeatCounts = {};
     rooms.forEach(room => {
       availableSeatCounts[room.name] = room.availableSeatCount;
     });
     this.setState({ loading: false, rooms, availableSeatCounts });
+  };
 
-    this.makeWebSocket = () => {
-      this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/`);
-      this.ws.onopen = () => {
-        console.log('YVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
-      };
-      this.ws.onmessage = evt => {
-        const data = JSON.parse(evt.data);
-        const availableSeatCounts = {...this.state.availableSeatCounts};
-        availableSeatCounts[data.room] = data.availableSeatCount;
-        this.setState({ availableSeatCounts });
-      };
-      this.ws.onclose = () => {
-        console.log('YVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
-        this.makeWebSocket();
-      };
+  makeWebSocket = () => {
+    this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/`);
+    this.ws.onopen = () => {
+      this.loadRoomList(false);
+      console.log('YVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
     };
+    this.ws.onmessage = evt => {
+      const data = JSON.parse(evt.data);
+      const availableSeatCounts = {...this.state.availableSeatCounts};
+      availableSeatCounts[data.room] = data.availableSeatCount;
+      this.setState({ availableSeatCounts });
+    };
+    this.ws.onclose = evt => {
+      if (evt.reason === 'unmount'){
+        console.log('YVCBooking:: WebSocket closed.'); // eslint-disable-line no-console
+        return;
+      }
+      console.log('YVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
+      setTimeout(this.makeWebSocket, 300);
+    };
+  };
+
+  componentDidMount = async () => {
     this.makeWebSocket();
     this.timer = setInterval(() => {
       this.setState({ currentServerTime: serverTime.getNow() });
@@ -93,7 +102,7 @@ class RoomList extends React.Component {
   };
 
   componentWillUnmount = () => {
-    if (this.ws) this.ws.close();
+    if (this.ws) this.ws.close(1000, 'unmount');
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
   };

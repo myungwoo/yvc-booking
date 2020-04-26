@@ -65,7 +65,8 @@ class Room extends React.Component {
     currentServerTime: serverTime.getNow(),
   };
 
-  componentDidMount = async () => {
+  loadBookings = async withLoading => {
+    if (withLoading) this.setState({ loading: true });
     try{
       const res = await axios.get(`/api/rooms/${this.props.room}`);
       const { bookings, ...room } = res.data;
@@ -78,20 +79,29 @@ class Room extends React.Component {
     }catch(err){
       if (err.response && err.response.status === 404) return this.redirect('/');
     }
-    this.makeWebSocket = () => {
-      this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/${this.props.room}`);
-      this.ws.onopen = () => {
-        console.log('YVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
-      };
-      this.ws.onmessage = evt => {
-        const bookings = JSON.parse(evt.data);
-        this.setState({ bookings });
-      };
-      this.ws.onclose = () => {
-        console.log('YVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
-        this.makeWebSocket();
-      };
+  };
+
+  makeWebSocket = () => {
+    this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/${this.props.room}`);
+    this.ws.onopen = () => {
+      this.loadBookings(false);
+      console.log('YVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
     };
+    this.ws.onmessage = evt => {
+      const bookings = JSON.parse(evt.data);
+      this.setState({ bookings });
+    };
+    this.ws.onclose = evt => {
+      if (evt.reason === 'unmount'){
+        console.log('YVCBooking:: WebSocket closed.'); // eslint-disable-line no-console
+        return;
+      }
+      console.log('YVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
+      setTimeout(this.makeWebSocket, 300);
+    };
+  };
+
+  componentDidMount = async () => {
     this.makeWebSocket();
     this.timer = setInterval(() => {
       this.setState({ currentServerTime: serverTime.getNow() });
@@ -99,7 +109,7 @@ class Room extends React.Component {
   };
 
   componentWillUnmount = () => {
-    if (this.ws) this.ws.close();
+    if (this.ws) this.ws.close(1000, 'unmount');
     if (this.timer) clearInterval(this.timer);
     this.timer = null;
   };
