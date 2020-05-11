@@ -138,6 +138,7 @@ class RoomList extends React.Component {
       <Grid container className={classes.root}>
         <Grid item xs={12} className={classes.title}>
           <Typography variant="h4" gutterBottom>YVC 좌석 예약 시스템</Typography>
+          {this.props.adminMode && <Typography variant="h5" gutterBottom>관리자 모드</Typography>}
           <Typography variant="body2" color="textSecondary">
             현재 서버 시간:
             {this.state.currentServerTime.format('YYYY년 MM월 DD일 HH시 mm분 ss초')}

@@ -253,6 +253,7 @@ class Room extends React.Component {
       <Grid container className={classes.root}>
         <Grid item xs={12} className={classNames(classes.title, classes.textCenter)}>
           <Typography variant="h4">YVC 좌석 예약 시스템</Typography>
+          {this.props.adminMode && <Typography variant="h5" gutterBottom>관리자 모드</Typography>}
           <Typography variant="h6" color="textSecondary">{room.title}</Typography>
           <Typography variant="body2" color="textSecondary">예배 시작 시간: {datetimeStrToHumanString(room.endTime)}</Typography>
           <Typography variant="body2" color="textSecondary">
