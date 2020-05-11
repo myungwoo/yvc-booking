@@ -2,6 +2,8 @@ const http = require('http');
 const express = require('express');
 const bodyParser = require('body-parser');
 const path = require('path');
+const basicAuth = require('express-basic-auth');
+require('dotenv').config();
 
 const app = express();
 const server = http.createServer(app);
@@ -21,6 +23,12 @@ app.use('/api', require('./api'));
 
 if (process.env.NODE_ENV === 'production'){
   app.use('/', express.static('client/build'));
+  app.use('/admin', basicAuth({
+    users: {
+      [process.env.USERNAME]: process.env.PASSWORD,
+    },
+    challenge: true,
+  }));
   app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname+'/client/build/index.html'));
   });

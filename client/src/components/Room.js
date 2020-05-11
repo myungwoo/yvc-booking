@@ -70,7 +70,7 @@ class Room extends React.Component {
     try{
       const res = await axios.get(`/api/rooms/${this.props.room}`);
       const { bookings, ...room } = res.data;
-      if (serverTime.getNow() < moment(room.startTime)) return this.redirect('/');
+      if (serverTime.getNow() < moment(room.startTime) && !this.props.adminMode) return this.redirect('/');
       this.setState({
         loading: false,
         room,
@@ -147,7 +147,7 @@ class Room extends React.Component {
       }
       this.setState({ subLoading: true });
       const hashedPassword = md5(password1);
-      axios.post(`/api/rooms/${room}/${position}`, {
+      axios.post(`/api/rooms/${room}/${position}${this.props.adminMode ? '?adminMode' : ''}`, {
         booker: name,
         simplePassword: hashedPassword,
       }).then(res => {
@@ -181,7 +181,7 @@ class Room extends React.Component {
         }
         hashedNewPassword = md5(password1);
       }
-      axios.put(`/api/rooms/${room}/${position}`, {
+      axios.put(`/api/rooms/${room}/${position}${this.props.adminMode ? '?adminMode' : ''}`, {
         booker: name,
         simplePassword: hashedPassword,
         newSimplePassword: hashedNewPassword,
@@ -208,7 +208,7 @@ class Room extends React.Component {
         return this.openSnackbar('비밀번호가 비어있습니다.', 'error');
       this.setState({ subLoading: true });
       const hashedPassword = md5(password);
-      axios.delete(`/api/rooms/${room}/${position}`, {
+      axios.delete(`/api/rooms/${room}/${position}${this.props.adminMode ? '?adminMode' : ''}`, {
         headers: {
           Authorization: `SimplePassword ${hashedPassword}`
         },
@@ -369,9 +369,14 @@ class Room extends React.Component {
   };
 }
 
+Room.defaultProps = {
+  adminMode: false,
+};
+
 Room.propTypes = {
   classes: PropTypes.object.isRequired,
   room: PropTypes.string.isRequired,
+  adminMode: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles)(Room);

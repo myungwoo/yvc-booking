@@ -108,10 +108,20 @@ class RoomList extends React.Component {
   };
 
   moveToRoom = (room) => () => {
-    this.props.history.push(`/${room.name}`);
+    const now = serverTime.getNow();
+    if (now < moment(room.startTime) && !this.props.adminMode) {
+      this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
+      return;
+    }
+    if (this.props.adminMode) {
+      this.props.history.push(`/admin/${room.name}`);
+    }
+    else {
+      this.props.history.push(`/${room.name}`);
+    }
   };
 
-  openSnackbar = (message, severity) => () => {
+  openSnackbar = (message, severity) => {
     this.setState({ snackbarOpen: true, snackbarMessage: message, snackbarAlertSeverity: severity });
   };
   handleSnackbarClose = (event, reason) => {
@@ -140,9 +150,7 @@ class RoomList extends React.Component {
               key={idx}
               className={classes.card}
               variant="outlined"
-              onClick={
-                now >= moment(room.startTime) ? this.moveToRoom(room) : this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error')
-              }
+              onClick={this.moveToRoom(room)}
             >
               <CardContent className={classes.cardContent}>
                 <Typography gutterBottom variant="h6" component="h5">
@@ -179,8 +187,13 @@ class RoomList extends React.Component {
   };
 }
 
+RoomList.defaultProps = {
+  adminMode: false,
+};
+
 RoomList.propTypes = {
   classes: PropTypes.object.isRequired,
+  adminMode: PropTypes.bool.isRequired,
 };
 
 export default withStyles(styles)(RoomList);

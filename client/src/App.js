@@ -21,6 +21,8 @@ class App extends React.Component {
     if (this.state.loading) return <Loading />;
     return (
       <Switch>
+        <Route exact path='/admin/:room' component={props => <Room adminMode room={props.match.params.room} {...props} />} />
+        <Route exact path='/admin' component={props => <RoomList adminMode {...props} />} />
         <Route exact path='/:room' component={props => <Room room={props.match.params.room} {...props} />} />
         <Route exact path='/' component={RoomList} />
         <Redirect to="/" />

@@ -49,6 +49,7 @@ router.get('/rooms/:name/:position', async (req, res) => {
 router.post('/rooms/:name/:position', async (req, res) => {
   const { name, position } = req.params;
   const { booker, simplePassword } = req.body;
+  const { adminMode } = req.query;
   const room = Rooms.getRoom(name);
   if (room === undefined)
     return res.sendStatus(404);
@@ -57,7 +58,7 @@ router.post('/rooms/:name/:position', async (req, res) => {
     
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime)
+  if (now < room.startTime && adminMode === undefined)
     return res.status(403).send({ reason: 'startTime' });
   if (now > room.endTime)
     return res.status(403).send({ reason: 'endTime' });
@@ -78,6 +79,7 @@ router.post('/rooms/:name/:position', async (req, res) => {
 router.put('/rooms/:name/:position', async (req, res) => {
   const { name, position } = req.params;
   const { booker, simplePassword, newSimplePassword } = req.body;
+  const { adminMode } = req.query;
   const room = Rooms.getRoom(name);
   if (room === undefined)
     return res.sendStatus(404);
@@ -85,7 +87,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
     return res.sendStatus(404);
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime)
+  if (now < room.startTime && adminMode === undefined)
     return res.status(403).send({ reason: 'startTime' });
   if (now > room.endTime)
     return res.status(403).send({ reason: 'endTime' });
@@ -110,6 +112,7 @@ router.put('/rooms/:name/:position', async (req, res) => {
 
 router.delete('/rooms/:name/:position', async (req, res) => {
   const { name, position } = req.params;
+  const { adminMode } = req.query;
   const room = Rooms.getRoom(name);
   if (room === undefined)
     return res.sendStatus(404);
@@ -118,7 +121,7 @@ router.delete('/rooms/:name/:position', async (req, res) => {
 
   const now = moment();
   // 예약 가능 시간에만 예약 가능하도록
-  if (now < room.startTime)
+  if (now < room.startTime && adminMode === undefined)
     return res.status(403).send({ reason: 'startTime' });
   if (now > room.endTime)
     return res.status(403).send({ reason: 'endTime' });
