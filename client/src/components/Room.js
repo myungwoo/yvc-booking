@@ -118,6 +118,7 @@ class Room extends React.Component {
     this.props.history.replace(url);
   };
   moveTo = url => () => {
+    if (this.props.adminMode) url = '/admin' + url;
     this.props.history.push(url);
   };
 
