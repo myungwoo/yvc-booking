@@ -40,4 +40,25 @@ process.on('unhandledRejection', error => {
 
 server.listen(app.get('port'), () => {
   console.log(`Find the server at: http://localhost:${app.get('port')}/`); // eslint-disable-line no-console
+
+  // PM2 무중단 패치를 위한 설정 (https://engineering.linecorp.com/ko/blog/pm2-nodejs/)
+  if (typeof process.send === 'function') {
+    process.send('ready');
+  }
+});
+
+let isDisableKeepAlive = false;
+app.use((req, res, next) => {
+  if (isDisableKeepAlive) {
+    res.set('Connection', 'close');
+  }
+  next();
+});
+
+process.on('SIGINT', () => {
+  isDisableKeepAlive = true;
+  server.close(() => {
+    console.log('server closed.'); // eslint-disable-line no-console
+    process.exit(0);
+  });
 });

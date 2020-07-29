@@ -5,8 +5,11 @@ module.exports = {
   apps : [{
     name: 'yvcbooking',
     script: 'server.js',
-    watch: '.',
-    ignore_watch : ['node_modules', '*.sqlite3', '*.sqlite3-journal', 'client', '.git'],
+    instances: 0,
+    exec_mode: 'cluster',
+    wait_ready: true,
+    listen_timeout: 50000,
+    kill_timeout: 10000,
     env_production: {
       NODE_ENV: 'production',
       PORT: 3000,
