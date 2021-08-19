@@ -81,6 +81,9 @@ const styles = {
     background: pink[200],
     cursor: 'pointer',
   },
+  unavailableMomSeat: {
+    background: pink[100],
+  },
   broadcastSeat: {
     background: blue[400],
   },
@@ -123,6 +126,7 @@ class SeatTable extends React.Component {
     if (val === ' ') return classes.noSeat;
     if (val === 'b') return classes.broadcastSeat;
     if (val === '-') return classes.unavailableSeat;
+    if (val === 'J') return classes.unavailableMomSeat;
     if (bookings.filter(booking => booking.position === position).length > 0)
       return classes.bookedSeat;
     if (val === 'j') return classes.momSeat;
@@ -139,6 +143,7 @@ class SeatTable extends React.Component {
     if (val === ' ') return '';
     if (val === '-') return '';
     if (val === 'b') return '방송실';
+    if (val === 'J') return '자모실';
     const booking = bookings.filter(booking => booking.position === position)[0];
     if (booking !== undefined){
       if (val === 'p') return `간이의자\n${booking.booker}`;
