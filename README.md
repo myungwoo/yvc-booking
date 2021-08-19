@@ -58,6 +58,22 @@ npm i -g pm2
 pm2 start ecosystem.config.js --env production
 ```
 
+### 재시작 시 pm2 자동 시작 설정
+
+```
+pm2 save
+```
+
+```
+pm2 startup
+```
+
+비활성화
+
+```
+pm2 unstartup
+```
+
 ## 부록
 
 ### nginx site 설정 파일 예시
