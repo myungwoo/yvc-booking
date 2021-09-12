@@ -4,12 +4,13 @@ const fs = require('fs');
 const db = require('../models');
 
 class Room {
-  constructor(name, title, layout, startTime, endTime) {
+  constructor(name, title, layout, startTime, endTime, eventTime) {
     this.name = name;
     this.title = title;
     this.layout = layout;
     this.startTime = moment(startTime);
     this.endTime = moment(endTime);
+    this.eventTime = moment(eventTime);
 
     this.seatCount = 0;
     layout.forEach(row => {
@@ -47,7 +48,7 @@ class Rooms {
         if (row.length < col) row = row + ' '.repeat(col-row.length);
         return row;
       });
-      return new Room(room.name, room.title, layout, room.startTime, room.endTime);
+      return new Room(room.name, room.title, layout, room.startTime, room.endTime, room.eventTime);
     });
   }
 

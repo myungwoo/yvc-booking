@@ -157,15 +157,19 @@ class RoomList extends React.Component {
                 <Typography gutterBottom variant="h6" component="h5">
                   {room.title}
                 </Typography>
-                {now > moment(room.endTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: blue[800] }}>
+                {now >= moment(room.eventTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: blue[800] }}>
                   예배가 이미 시작했습니다.
+                </Typography>}
+                {now < moment(room.eventTime) && now > moment(room.endTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: red[800] }}>
+                  예약 가능 시간이 지났습니다.
                 </Typography>}
                 {now < moment(room.startTime) && <Typography variant="body2" component="p" gutterBottom style={{ color: red[800] }}>
                   예약 가능 시간이 아닙니다.
                 </Typography>}
                 <Typography variant="body2" component="p" gutterBottom>
                   {now < moment(room.startTime) && [`예약 시작 시간: ${datetimeStrToHumanString(room.startTime)}`, <br key={1} />]}
-                  예배 시작 시간: {datetimeStrToHumanString(room.endTime)}
+                  {now < moment(room.endTime) && [`예약 종료 시간: ${datetimeStrToHumanString(room.endTime)}`, <br key={1} />]}
+                  예배 시작 시간: {datetimeStrToHumanString(room.eventTime)}
                 </Typography>
                 <Typography variant="body2" component="p">
                   실시간 잔여 좌석: {availableSeatCounts[room.name]} / {room.seatCount}

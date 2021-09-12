@@ -163,7 +163,7 @@ class Room extends React.Component {
           if (err.response.data.reason === 'startTime')
             this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
           if (err.response.data.reason === 'endTime')
-            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
+            this.openSnackbar('예약 가능 시간이 지났습니다.', 'error');
           if (err.response.data.reason === 'exists')
             this.openSnackbar('이미 예약된 좌석입니다.', 'error');
         }
@@ -200,7 +200,7 @@ class Room extends React.Component {
           if (err.response.data.reason === 'startTime')
             this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
           if (err.response.data.reason === 'endTime')
-            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
+            this.openSnackbar('예약 가능 시간이 지났습니다.', 'error');
         }
       });
     }
@@ -227,7 +227,7 @@ class Room extends React.Component {
           if (err.response.data.reason === 'startTime')
             this.openSnackbar('예약 시작 시간이 아직 되지 않았습니다.', 'error');
           if (err.response.data.reason === 'endTime')
-            this.openSnackbar('예배가 이미 시작했습니다.', 'error');
+            this.openSnackbar('예약 가능 시간이 지났습니다.', 'error');
         }
       });
     }
@@ -255,7 +255,8 @@ class Room extends React.Component {
           <Typography variant="h4">YVC 좌석 예약 시스템</Typography>
           {this.props.adminMode && <Typography variant="h5" gutterBottom>관리자 모드</Typography>}
           <Typography variant="h6" color="textSecondary">{room.title}</Typography>
-          <Typography variant="body2" color="textSecondary">예배 시작 시간: {datetimeStrToHumanString(room.endTime)}</Typography>
+          <Typography variant="body2" color="textSecondary">예약 종료 시간: {datetimeStrToHumanString(room.endTime)}</Typography>
+          <Typography variant="body2" color="textSecondary">예배 시작 시간: {datetimeStrToHumanString(room.eventTime)}</Typography>
           <Typography variant="body2" color="textSecondary">
             현재 서버 시간:
             {this.state.currentServerTime.format('YYYY년 MM월 DD일 HH시 mm분 ss초')}
