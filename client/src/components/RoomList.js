@@ -76,7 +76,7 @@ class RoomList extends React.Component {
     this.ws = new WebSocket(`${window.location.protocol.startsWith('https') ? 'wss' : 'ws'}://${window.location.host}/ws/`);
     this.ws.onopen = () => {
       this.loadRoomList(false);
-      console.log('YVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
+      console.log('JVCBooking:: WebSocket connected.'); // eslint-disable-line no-console
     };
     this.ws.onmessage = evt => {
       const data = JSON.parse(evt.data);
@@ -86,10 +86,10 @@ class RoomList extends React.Component {
     };
     this.ws.onclose = evt => {
       if (evt.reason === 'unmount'){
-        console.log('YVCBooking:: WebSocket closed.'); // eslint-disable-line no-console
+        console.log('JVCBooking:: WebSocket closed.'); // eslint-disable-line no-console
         return;
       }
-      console.log('YVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
+      console.log('JVCBooking:: WebSocket closed. Try reconnecting...'); // eslint-disable-line no-console
       setTimeout(this.makeWebSocket, 300);
     };
   };
@@ -137,7 +137,7 @@ class RoomList extends React.Component {
     return (
       <Grid container className={classes.root}>
         <Grid item xs={12} className={classes.title}>
-          <Typography variant="h4" gutterBottom>YVC 좌석 예약 시스템</Typography>
+          <Typography variant="h4" gutterBottom>JVC 좌석 예약 시스템</Typography>
           {this.props.adminMode && <Typography variant="h5" gutterBottom>관리자 모드</Typography>}
           <Typography variant="body2" color="textSecondary">
             현재 서버 시간:
